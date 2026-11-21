@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Número de compilación: en GitHub = número de ejecución del workflow; en local = 1
+def buildNumber = (System.getenv('BUILD_NUMBER') ?: '1').toInteger()
+
+android {
+    namespace 'com.grm.lukka'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.grm.lukka'
+        minSdk 23
+        targetSdk 35
+        versionCode buildNumber
+        versionName "0.1.${buildNumber}"
+    }
+
+    // Firma release solo si existen las variables (GitHub Secrets); si no, se omite
+    signingConfigs {
+        release {
+            def ksPath = System.getenv('KEYSTORE_PATH')
+            if (ksPath) {
+                storeFile file(ksPath)
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias System.getenv('KEY_ALIAS')
+                keyPassword System.getenv('KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (System.getenv('KEYSTORE_PATH')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // Que un aviso de lint no tumbe la compilación del APK
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+base {
+    archivesName = 'LUKKA-Television'
+}
+
+dependencies {
+    def media3Version = '1.11.1'
+    implementation "androidx.media3:media3-exoplayer:${media3Version}"
+    implementation "androidx.media3:media3-exoplayer-hls:${media3Version}"
+    implementation "androidx.media3:media3-ui:${media3Version}"
+    implementation 'androidx.core:core:1.17.0'
+}
