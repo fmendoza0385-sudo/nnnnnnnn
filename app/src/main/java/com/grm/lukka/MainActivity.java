@@ -16,6 +16,8 @@ import android.widget.TextView;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DefaultDataSource;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
@@ -23,6 +25,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.ui.PlayerView;
 
 /** Actividad principal de LUKKA Television. Base inicial de reproducción IPTV. */
+@UnstableApi
 public class MainActivity extends Activity {
     private ExoPlayer player;
     private PlayerView playerView;
@@ -80,7 +83,7 @@ public class MainActivity extends Activity {
     private void createPlayerIfNeeded() {
         if (player != null) return;
         DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
-                .setBufferDurationsMs(1500, 15000, 1500, 3000)
+                .setBufferDurationsMs(3000, 15000, 1500, 3000)
                 .build();
         DefaultHttpDataSource.Factory http = new DefaultHttpDataSource.Factory()
                 .setAllowCrossProtocolRedirects(true)
@@ -88,7 +91,7 @@ public class MainActivity extends Activity {
                 .setReadTimeoutMs(20000);
         player = new ExoPlayer.Builder(this)
                 .setLoadControl(loadControl)
-                .setMediaSourceFactory(new DefaultMediaSourceFactory(this, http))
+                .setMediaSourceFactory(new DefaultMediaSourceFactory(new DefaultDataSource.Factory(this, http)))
                 .build();
         playerView.setPlayer(player);
         player.addListener(new Player.Listener() {
